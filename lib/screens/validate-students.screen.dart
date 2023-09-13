@@ -37,6 +37,48 @@ class _ValidateStudentsScreenState extends State<ValidateStudentsScreen> {
             context: context,
             color: Colors.blue);
       });
+
+      (() async {
+        try {
+          setState(() {
+            loading = true;
+          });
+          await new Dio().post("${Constants.BASE_URL}/validate-card",
+              data: {"card": text});
+          setState(() {
+            validated = true;
+            status = true;
+            loading = false;
+            scan_mode = false;
+            scanned = false;
+          });
+        } on DioError catch (e) {
+          Utils.showSnackBar(
+              title: e.response!.data["message"], context: context);
+          setState(() {
+            validated = true;
+            status = false;
+            loading = false;
+          });
+        } catch (e) {
+          setState(() {
+            validated = true;
+            status = false;
+            loading = false;
+          });
+        } finally {
+          setState(() {
+            loading = false;
+          });
+        }
+      })();
+    });
+
+    setState(() {
+      scanned = false;
+      validated = false;
+      status = false;
+      loading = false;
     });
 
     NfcManager.instance.startSession(onDiscovered: (NfcTag tag) async {
@@ -56,114 +98,101 @@ class _ValidateStudentsScreenState extends State<ValidateStudentsScreen> {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (!scan_mode && !scanned)
-                Text(
-                  "Click button below to start scanning",
-                  style: Theme.of(context).textTheme.headline5,
-                  textAlign: TextAlign.center,
+          child: loading
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: CircularProgressIndicator()),
+                    SizedBox(height: 10),
+                    Text(
+                      "Validating student...",
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (!scan_mode && !scanned)
+                      Text(
+                        "Click button below to start scanning",
+                        style: Theme.of(context).textTheme.headline5,
+                        textAlign: TextAlign.center,
+                      ),
+                    if (scan_mode && !scanned)
+                      Center(
+                        child: Text(
+                          "Tap NFC card to validate student!",
+                          style: Theme.of(context).textTheme.headline5,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    if (scan_mode && scanned)
+                      Center(
+                        child: Text(
+                          "NFC card scanned! Tap button to scan a new card",
+                          style: Theme.of(context).textTheme.headline5,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    if ((scan_mode && scanned) || (!scan_mode && !scanned))
+                      TextButton(
+                        // give some styles to the button
+                        style: TextButton.styleFrom(
+                          primary: Colors.white,
+                          backgroundColor: Colors.blue,
+                          onSurface: Colors.grey,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 40),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            scan_mode = true;
+                            scanned = false;
+                          });
+                          _tagRead();
+                        },
+                        child: const Text(
+                          "Scan",
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1),
+                        ),
+                      ),
+                    const SizedBox(height: 10),
+                    if (validated)
+                      Image.asset(
+                        status ? "images/success.png" : "images/cancel.png",
+                        width: 120,
+                        height: 140,
+                      ),
+                    const SizedBox(height: 15),
+                    if (validated && status)
+                      const Text(
+                        "Student validated successfully!",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    if (validated && !status)
+                      const Text(
+                        "Student validation failed!",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    const SizedBox(height: 50),
+                    // if (scanned)
+                    //   PrimaryButton(
+                    //     text: "Validate",
+                    //     block: true,
+                    //     isLoading: loading,
+                    //     onPressed: () async {},
+                    //   ),
+                  ],
                 ),
-              if (scan_mode && !scanned)
-                Center(
-                  child: Text(
-                    "Tap NFC card to validate student!",
-                    style: Theme.of(context).textTheme.headline5,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              if (scan_mode && scanned)
-                Center(
-                  child: Text(
-                    "NFC card scanned! Tap button to scan a new card",
-                    style: Theme.of(context).textTheme.headline5,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              if ((scan_mode && scanned) || (!scan_mode && !scanned))
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      scan_mode = true;
-                      scanned = false;
-                    });
-                    _tagRead();
-                  },
-                  child: const Text(
-                    "Scan A New Card",
-                    style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1),
-                  ),
-                ),
-              const SizedBox(height: 10),
-              if (validated)
-                Image.asset(
-                  status ? "images/success.png" : "images/cancel.png",
-                  width: 120,
-                  height: 140,
-                ),
-              const SizedBox(height: 15),
-              if (validated && status)
-                const Text(
-                  "Student validated successfully!",
-                  style: TextStyle(fontSize: 18),
-                ),
-              if (validated && !status)
-                const Text(
-                  "Student validation failed!",
-                  style: TextStyle(fontSize: 18),
-                ),
-              const SizedBox(height: 50),
-              if (scanned)
-                PrimaryButton(
-                  text: "Validate",
-                  block: true,
-                  isLoading: loading,
-                  onPressed: () async {
-                    Utils.showSnackBar(
-                        title: text, context: context, color: Colors.green);
-
-                    try {
-                      setState(() {
-                        loading = true;
-                      });
-                      await new Dio().post(
-                          "${Constants.BASE_URL}/validate-card",
-                          data: {"card": text});
-                      setState(() {
-                        validated = true;
-                        status = true;
-                        loading = false;
-                        scan_mode = false;
-                        scanned = false;
-                      });
-                    } on DioError catch (e) {
-                      Utils.showSnackBar(
-                          title: e.response!.data["message"], context: context);
-                      setState(() {
-                        validated = true;
-                        status = false;
-                        loading = false;
-                      });
-                    } catch (e) {
-                      setState(() {
-                        validated = true;
-                        status = false;
-                        loading = false;
-                      });
-                    } finally {
-                      setState(() {
-                        loading = false;
-                      });
-                    }
-                  },
-                ),
-            ],
-          ),
         ),
       ),
     );

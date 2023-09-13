@@ -24,7 +24,7 @@ class CustomColor {
 }
 
 class Constants {
-  static const BASE_URL = "https://5453-102-22-166-232.ngrok-free.app/api";
+  static const BASE_URL = "https://tapneat.perimi.rw/api";
 }
 
 class Utils {
@@ -47,6 +47,8 @@ class Utils {
       content: Text(title),
       backgroundColor: color,
     );
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 

@@ -36,58 +36,62 @@ class HistoryScreen extends StatelessWidget {
                         "Something went wrong. Check your Internet");
                   } else {
                     return Consumer<HistoryProvider>(builder: (ctx, data, _) {
-                      return Column(
-                        children: [
-                          ...data.items
-                              .map(
-                                (e) => SizedBox(
-                                  width: double.infinity,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: CardContainer(
-                                      child: Padding(
-                                          padding: const EdgeInsets.all(10.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                "${e["student"]["name"]}, ${e["student"]["phoneNumber"]}, ${e["amount"]} RWF",
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    letterSpacing: 1),
-                                              ),
-                                              const SizedBox(height: 10),
-                                              const Text(
-                                                "Validation success",
-                                                softWrap: true,
-                                              ),
-                                              const SizedBox(height: 10),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    timeago.format(
-                                                      DateTime.parse(
-                                                          e['created_at']),
+                      return data.items.isEmpty
+                          ? const EmptyContainer("No validation history yet")
+                          : Column(
+                              children: [
+                                ...data.items
+                                    .map(
+                                      (e) => SizedBox(
+                                        width: double.infinity,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: CardContainer(
+                                            child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(10.0),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      "${e["student"]["name"]}, ${e["student"]["phoneNumber"]}, ${e["amount"]} RWF",
+                                                      style: const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          letterSpacing: 1),
                                                     ),
-                                                    style: TextStyle(
-                                                        color:
-                                                            Colors.grey[600]),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          )),
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ],
-                      );
+                                                    const SizedBox(height: 10),
+                                                    const Text(
+                                                      "Validation success",
+                                                      softWrap: true,
+                                                    ),
+                                                    const SizedBox(height: 10),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Text(
+                                                          timeago.format(
+                                                            DateTime.parse(e[
+                                                                'created_at']),
+                                                          ),
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .grey[600]),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                )),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              ],
+                            );
                     });
                   }
                 }

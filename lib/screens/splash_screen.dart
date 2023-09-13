@@ -7,11 +7,11 @@ import '../providers/auth_provider.dart';
 import 'dashboard.screen.dart';
 import 'login.dart';
 
-
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _SplashScreenState();
   }
 }
@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
-      body: Container(
+      body: SizedBox(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         child: Center(
@@ -38,13 +38,17 @@ class _SplashScreenState extends State<SplashScreen> {
               SizedBox(height: 30),
               Text(
                 "TAP & EAT",
-                style: TextStyle(fontSize: 46, color: Colors.white,fontWeight: FontWeight.bold, letterSpacing: 2),
+                style: TextStyle(
+                    fontSize: 30,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2),
               ),
               SizedBox(height: 20),
               Text(
-                "AGENTS APP",
+                "UNIVERISTY OF RWANDA",
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   letterSpacing: 1.5,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -59,20 +63,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void startTimer() {
     Timer(const Duration(seconds: 3), () {
-      navigateUser(); //It will redirect  after 3 seconds
+      navigateUser();
     });
   }
 
   void navigateUser() {
-    Provider.of<AuthProvider>(context, listen: false)
-        .tryAutoLogin()
-        .then((value) {
-      final isAuth = Provider.of<AuthProvider>(context, listen: false).isAuth;
-      if (isAuth) {
-        Navigator.pushReplacementNamed(context, DashboardScreen.routeName);
-      } else {
-        Navigator.pushReplacementNamed(context, LoginScreen.routeName);
-      }
-    });
+    Navigator.pushReplacementNamed(context, DashboardScreen.routeName);
   }
 }

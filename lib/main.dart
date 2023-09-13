@@ -53,7 +53,6 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider(dio)),
         ChangeNotifierProvider(create: (_) => ReportsProvider(dio)),
         ChangeNotifierProvider(create: (_) => HistoryProvider(dio)),
-
       ],
       child: MaterialApp(
         title: 'Tap & Eat',
@@ -71,7 +70,7 @@ class MyApp extends StatelessWidget {
                 ),
           ),
         ),
-        home: AddStudentsScreen(),
+        home: SplashScreen(),
         routes: {
           DashboardScreen.routeName: (_) => const DashboardScreen(),
           LoginScreen.routeName: (_) => LoginScreen(),

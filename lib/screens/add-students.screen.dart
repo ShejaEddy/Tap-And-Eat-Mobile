@@ -19,7 +19,6 @@ class AddStudentsScreen extends StatefulWidget {
 class _AddStudentsScreenState extends State<AddStudentsScreen> {
   ValueNotifier<dynamic> result = ValueNotifier(null);
   String text = "";
-  String _nfcData = "";
   String names = "";
   String phoneNumber = "";
   String pin = "";
@@ -27,7 +26,10 @@ class _AddStudentsScreenState extends State<AddStudentsScreen> {
   bool scanned = false;
   bool scan_mode = false;
   bool _isLoading = false;
-  var _formKey = GlobalKey<FormState>();
+  final TextEditingController _namesController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
 
   void _tagRead() {
     result.addListener(() {
@@ -66,27 +68,75 @@ class _AddStudentsScreenState extends State<AddStudentsScreen> {
               // Asks a user to tap NFC card
 
               if (!scan_mode && !scanned)
-                Text(
-                  "Click button below to start scanning",
-                  style: Theme.of(context).textTheme.headline5,
-                  textAlign: TextAlign.center,
+                Container(
+                  margin: const EdgeInsets.only(bottom: 20, top: 15),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    "Click button below to scan a meal card",
+                    style: Theme.of(context).textTheme.headline6,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               if (scan_mode && !scanned)
-                Center(
-                  child: Text(
-                    "Tap NFC card to validate student!",
-                    style: Theme.of(context).textTheme.headline5,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                Container(
+                    margin: const EdgeInsets.only(bottom: 20, top: 15),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 1,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        "Tap NFC card to validate student!",
+                        style: Theme.of(context).textTheme.headline6,
+                        textAlign: TextAlign.center,
+                      ),
+                    )),
               if (scan_mode && scanned)
-                Center(
-                  child: Text(
-                    "NFC card scanned! Tap below to scan a new card",
-                    style: Theme.of(context).textTheme.headline5,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                Container(
+                    margin: const EdgeInsets.only(bottom: 20, top: 15),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 137, 226, 172),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 1,
+                      ),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "NFC card scanned!",
+                            style: Theme.of(context).textTheme.headline6,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            "Tap button to scan a new card",
+                            style: TextStyle(
+                              fontSize: 13,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    )),
               if ((scan_mode && scanned) || (!scan_mode && !scanned))
                 TextButton(
                   onPressed: () {
@@ -111,7 +161,11 @@ class _AddStudentsScreenState extends State<AddStudentsScreen> {
               }),*/
               const SizedBox(height: 10),
               InputWidget(
+                  controller: _namesController,
                   validator: (val) {
+                    if (val!.isEmpty) {
+                      return "Please enter names";
+                    }
                     return null;
                   },
                   label: "Names",
@@ -120,7 +174,11 @@ class _AddStudentsScreenState extends State<AddStudentsScreen> {
                   }),
               const SizedBox(height: 10),
               InputWidget(
+                  controller: _phoneNumberController,
                   validator: (val) {
+                    if (val!.isEmpty) {
+                      return "Please enter phone number";
+                    }
                     return null;
                   },
                   label: "Phone Number",
@@ -129,70 +187,127 @@ class _AddStudentsScreenState extends State<AddStudentsScreen> {
                     phoneNumber = val!;
                   }),
               const SizedBox(height: 10),
-              InputWidget(
-                  validator: (val) {
-                    return null;
-                  },
-                  inputType: TextInputType.number,
-                  label: "Pin",
-                  onSaved: (val) {
-                    pin = val!;
-                  }),
-              const SizedBox(height: 10),
-              InputWidget(
-                  validator: (val) {
-                    return null;
-                  },
-                  inputType: TextInputType.number,
-                  label: "Confirm Pin",
-                  onSaved: (val) {
-                    confirmPin = val!;
-                  }),
-              const SizedBox(height: 10),
+              // InputWidget(
+              //     validator: (val) {
+              //       if (val!.isEmpty) {
+              //         return "Please enter pin";
+              //       }
+              //       return null;
+              //     },
+              //     inputType: TextInputType.number,
+              //     label: "Pin",
+              //     onSaved: (val) {
+              //       pin = val!;
+              //     }),
+              // const SizedBox(height: 10),
+              // InputWidget(
+              //     validator: (val) {
+              //       if (val!.isEmpty) {
+              //         return "Please enter pin confirmation";
+              //       }
+              //       return null;
+              //     },
+              //     inputType: TextInputType.number,
+              //     label: "Confirm Pin",
+              //     onSaved: (val) {
+              //       confirmPin = val!;
+              //     }),
+              // const SizedBox(height: 10),
               PrimaryButton(
-                text: "Save",
+                text: "Register",
                 onPressed: () async {
+                  if (_isLoading) return;
+
+                  var ok = _formKey.currentState!.validate();
+
+                  if (!ok) return;
+
                   Utils.showSnackBar(
                       title: "Loading...",
                       context: context,
                       color: Colors.orange);
 
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    if (pin != confirmPin) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text("Pin and Confirm Pin do not match"),
-                        backgroundColor: Colors.red,
-                      ));
-                      return;
-                    }
+                  _formKey.currentState!.save();
 
-                    try {
-                      await Dio().post(
-                        "${Constants.BASE_URL}/students",
-                        data: {
-                          "name": names,
-                          "phoneNumber": phoneNumber,
-                          "pin": pin,
-                          "card": text
-                        },
+                  // if (pin != confirmPin) {
+                  //   Utils.showSnackBar(
+                  //       title: "Pin and confirm pin do not match",
+                  //       context: context,
+                  //       color: Colors.red);
+                  //   return;
+                  // }
+
+                  // check if text is empty
+                  if (text.isEmpty) {
+                    Utils.showSnackBar(
+                        title: "Please scan a student meal card",
+                        context: context,
+                        color: Colors.red);
+                    return;
+                  }
+
+                  setState(() {
+                    _isLoading = true;
+                  });
+
+                  try {
+                    await Dio().post(
+                      "${Constants.BASE_URL}/students",
+                      data: {
+                        "name": names,
+                        "phoneNumber": phoneNumber,
+                        "pin": "1234",
+                        "card": text
+                      },
+                    );
+
+                    Utils.showSnackBar(
+                        title: "Student added successfully",
+                        context: context,
+                        color: Colors.green);
+                    setState(() {
+                      scan_mode = false;
+                      scanned = false;
+                      _isLoading = false;
+                      // empty fields
+                      names = "";
+                      phoneNumber = "";
+                      _namesController.clear();
+                      _phoneNumberController.clear();
+                    });
+                  } on DioError catch (e) {
+                    if (e.response != null) {
+                      if (e.response!.statusCode == 401) {
+                        Utils.showSnackBar(
+                          title: "Phone number already exists",
+                          context: context,
+                        );
+                      } else if (e.response!.statusCode == 403) {
+                        Utils.showSnackBar(
+                          title: "Card already belongs to another student",
+                          context: context,
+                        );
+                      } else {
+                        Utils.showSnackBar(
+                          title: "Something went wrong",
+                          context: context,
+                        );
+                      }
+                    } else {
+                      // Handle non-HTTP related errors (e.g., network issues)
+                      Utils.showSnackBar(
+                        title: "Network Error",
+                        context: context,
                       );
-
-                      Utils.showSnackBar(
-                          title: "Student added successfully",
-                          context: context,
-                          color: Colors.green);
-                      setState(() {
-                        scan_mode = false;
-                        scanned = false;
-                      });
-                    } catch (e) {
-                      Utils.showSnackBar(
-                          title: "Something went wrong, try again later",
-                          context: context,
-                          color: Colors.red);
-                      print(e);
                     }
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  } catch (e) {
+                    Utils.showSnackBar(
+                        title: "Something went wrong, try again later",
+                        context: context,
+                        color: Colors.red);
                   }
                 },
                 block: true,
